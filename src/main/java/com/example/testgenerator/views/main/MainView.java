@@ -12,6 +12,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import elemental.json.Json;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,7 +25,6 @@ public class MainView extends HorizontalLayout {
 
     private TextField name;
     private Button sayHello;
-    private Button addQuestion;
 
     public MainView() {
         File uploadFolder = new File("src/main/questions");
@@ -35,11 +35,16 @@ public class MainView extends HorizontalLayout {
         Upload upload = new Upload((MultiFileReceiver) (filename, mimeType) -> {
             File file = new File(uploadFolder, filename);
             try {
+                Notification.show("Uploaded file - '" + filename.substring(0, filename.lastIndexOf('.')) + "'");
                 return new FileOutputStream(file);
             } catch (FileNotFoundException e1) {
                 e1.printStackTrace();
                 return null;
             }
+        });
+
+        upload.addSucceededListener(event -> {
+            upload.getElement().setPropertyJson("files", Json.createArray());
         });
 
         upload.setAcceptedFileTypes("text/x-java-source,java", ".java");
@@ -48,22 +53,6 @@ public class MainView extends HorizontalLayout {
         uploadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         upload.setUploadButton(uploadButton);
-
-        // Disable the upload button after the file is selected
-        // Re-enable the upload button after the file is cleared
-        upload.getElement().addEventListener("max-files-reached-changed", event -> {
-            boolean maxFilesReached = event.getEventData()
-                    .getBoolean("event.detail.value");
-            uploadButton.setEnabled(!maxFilesReached);
-        }).addEventData("event.detail.value");
-
-        upload.addSucceededListener(event -> {
-            String fileName = event.getFileName();
-            Notification.show("Uploading file " + fileName);
-
-            // Do something with the file data
-            // processFile(inputStream, fileName);
-        });
 
         add(upload);
 
