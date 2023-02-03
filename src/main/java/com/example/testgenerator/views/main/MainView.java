@@ -7,11 +7,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.MultiFileReceiver;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 @PageTitle("Main")
 @Route(value = "main", layout = MainLayout.class)
@@ -23,8 +27,21 @@ public class MainView extends HorizontalLayout {
     private Button addQuestion;
 
     public MainView() {
-        MemoryBuffer buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
+        File uploadFolder = new File("src/main/questions");
+        if (!uploadFolder.exists()) {
+            uploadFolder.mkdirs();
+        }
+
+        Upload upload = new Upload((MultiFileReceiver) (filename, mimeType) -> {
+            File file = new File(uploadFolder, filename);
+            try {
+                return new FileOutputStream(file);
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+                return null;
+            }
+        });
+
         upload.setAcceptedFileTypes("text/x-java-source,java", ".java");
 
         Button uploadButton = new Button("Upload Question");
@@ -40,6 +57,14 @@ public class MainView extends HorizontalLayout {
             uploadButton.setEnabled(!maxFilesReached);
         }).addEventData("event.detail.value");
 
+        upload.addSucceededListener(event -> {
+            String fileName = event.getFileName();
+            Notification.show("Uploading file " + fileName);
+
+            // Do something with the file data
+            // processFile(inputStream, fileName);
+        });
+
         add(upload);
 
         name = new TextField("Your name");
@@ -54,5 +79,6 @@ public class MainView extends HorizontalLayout {
 
         add(name, sayHello);
     }
+
 
 }
