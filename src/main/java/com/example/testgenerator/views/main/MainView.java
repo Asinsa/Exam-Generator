@@ -1,12 +1,15 @@
 package com.example.testgenerator.views.main;
 
 import com.example.testgenerator.views.MainLayout;
+import com.example.testgenerator.views.QuizGenerationView;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.MultiFileReceiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.PageTitle;
@@ -28,8 +31,18 @@ import java.util.List;
 public class MainView extends HorizontalLayout {
 
     private Button uploadButton;
+    private Button makeQuiz;
 
     public MainView() {
+
+        VerticalLayout mainLayout = new VerticalLayout();
+        add(mainLayout);
+        mainLayout.setAlignItems(Alignment.CENTER);
+
+        HorizontalLayout layout = new HorizontalLayout();
+        setMargin(true);
+        layout.setWidthFull();
+        mainLayout.add(layout);
 
         // Upload questions
         File uploadFolder = new File("src/main/questions");
@@ -87,10 +100,12 @@ public class MainView extends HorizontalLayout {
         grid.addColumn(a -> a.get(1)).setHeader("Upload Date").setSortable(true);
 
         // Layouts
-        setMargin(true);
-        add(upload);
-        add(grid);
+        layout.add(upload);
+        layout.add(grid);
+
+        // Make Quiz Button
+        makeQuiz = new Button("Make Test");
+        makeQuiz.addClickListener( e -> UI.getCurrent().navigate(QuizGenerationView.class));
+        mainLayout.add(makeQuiz);
     }
-
-
 }
