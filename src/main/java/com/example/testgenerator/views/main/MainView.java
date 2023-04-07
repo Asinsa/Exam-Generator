@@ -1,5 +1,6 @@
 package com.example.testgenerator.views.main;
 
+import com.example.testgenerator.Question;
 import com.example.testgenerator.views.MainLayout;
 import com.example.testgenerator.views.QuizGenerationView;
 import com.vaadin.flow.component.Key;
@@ -45,7 +46,7 @@ public class MainView extends HorizontalLayout {
         mainLayout.add(layout);
 
         // Upload questions
-        File uploadFolder = new File("src/main/questions");
+        File uploadFolder = new File("src/main/java/com/example/testgenerator/questions");
         if (!uploadFolder.exists()) {
             uploadFolder.mkdirs();
         }
@@ -75,29 +76,35 @@ public class MainView extends HorizontalLayout {
 
 
         // View All Question Names
-        List<ArrayList<String>> questions = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
 
-        File[] files = new File("src/main/questions").listFiles();
+        File[] files = new File("src/main/java/com/example/testgenerator/questions").listFiles();
 
         for (File file : files) {
             if (file.isFile()) {
                 String filename = file.getName();
                 if (FilenameUtils.getExtension(filename).equals("java")) {
-                    ArrayList<String> question = new ArrayList<>();
+                    String name = filename.substring(0, filename.lastIndexOf('.'));
 
-                    question.add(filename.substring(0, filename.lastIndexOf('.')));
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                    question.add(sdf.format(file.lastModified()));
+                    try {
+                        Class<?> questionClass = Class.forName("com.example.testgenerator.questions." + name);
+                        Question question = (Question) questionClass.newInstance();
 
-                    questions.add(question);
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        question.setDate(sdf.format(file.lastModified()));
+
+                        questions.add(question);
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                        System.out.println(name + " is not a valid question file!");
+                    }
                 }
             }
         }
 
-        Grid<ArrayList<String>> grid = new Grid<>();
+        Grid<Question> grid = new Grid<>(Question.class, false);
+        grid.addColumn(Question::getName).setHeader("Question Name").setSortable(true);
+        grid.addColumn(Question::getDate).setHeader("Upload Date").setSortable(true);
         grid.setItems(questions);
-        grid.addColumn(a -> a.get(0)).setHeader("Question Name").setSortable(true);
-        grid.addColumn(a -> a.get(1)).setHeader("Upload Date").setSortable(true);
 
         // Layouts
         layout.add(upload);
