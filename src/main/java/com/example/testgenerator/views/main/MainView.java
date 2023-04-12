@@ -1,8 +1,10 @@
 package com.example.testgenerator.views.main;
 
 import com.example.testgenerator.Question;
+import com.example.testgenerator.QuestionService;
 import com.example.testgenerator.views.MainLayout;
 import com.example.testgenerator.views.QuizGenerationView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -23,28 +25,42 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 @PageTitle("Main")
+@RouteAlias("home")
 @Route(value = "main", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 public class MainView extends HorizontalLayout {
 
     private Button uploadButton;
     private Button makeQuiz;
+    private QuestionService questionManager;
 
-    public MainView() {
+    public MainView(QuestionService questionManager) {
+        this.questionManager = questionManager;
 
+        // Layouts
         VerticalLayout mainLayout = new VerticalLayout();
-        add(mainLayout);
         mainLayout.setAlignItems(Alignment.CENTER);
 
         HorizontalLayout layout = new HorizontalLayout();
-        setMargin(true);
         layout.setWidthFull();
-        mainLayout.add(layout);
 
+        setMargin(true);
+
+        layout.add(getUploadSection(), getFileList());
+
+        // Make Quiz Button
+        makeQuiz = new Button("Make Test");
+        makeQuiz.addClickListener( e -> UI.getCurrent().navigate(QuizGenerationView.class));
+
+        add(mainLayout);
+
+        mainLayout.add(layout, makeQuiz);
+    }
+
+    private Component getUploadSection() {
         // Upload questions
         File uploadFolder = new File("src/main/java/com/example/testgenerator/questions");
         if (!uploadFolder.exists()) {
@@ -73,10 +89,12 @@ public class MainView extends HorizontalLayout {
         uploadButton.addClickShortcut(Key.ENTER);
 
         upload.setUploadButton(uploadButton);
+        return upload;
+    }
 
-
+    private Component getFileList() {
         // View All Question Names
-        List<Question> questions = new ArrayList<>();
+        HashSet<Question> questions = new HashSet<>();
 
         File[] files = new File("src/main/java/com/example/testgenerator/questions").listFiles();
 
@@ -94,6 +112,7 @@ public class MainView extends HorizontalLayout {
                         question.setDate(sdf.format(file.lastModified()));
 
                         questions.add(question);
+                        questionManager.addQuestion(name, question);
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                         System.out.println(name + " is not a valid question file!");
                     }
@@ -105,14 +124,6 @@ public class MainView extends HorizontalLayout {
         grid.addColumn(Question::getName).setHeader("Question Name").setSortable(true);
         grid.addColumn(Question::getDate).setHeader("Upload Date").setSortable(true);
         grid.setItems(questions);
-
-        // Layouts
-        layout.add(upload);
-        layout.add(grid);
-
-        // Make Quiz Button
-        makeQuiz = new Button("Make Test");
-        makeQuiz.addClickListener( e -> UI.getCurrent().navigate(QuizGenerationView.class));
-        mainLayout.add(makeQuiz);
+        return grid;
     }
 }

@@ -399,13 +399,13 @@
     "@vaadin/vaadin-crud": "$@vaadin/vaadin-crud",
     "@vaadin/vaadin-grid-pro": "$@vaadin/vaadin-grid-pro",
     "@vaadin/vaadin-rich-text-editor": "$@vaadin/vaadin-rich-text-editor",
-    "@fontsource/nunito": "$@fontsource/nunito",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "date-fns": "$date-fns",
-    "line-awesome": "$line-awesome",
     "lit": "$lit",
-    "proj4": "$proj4"
+    "proj4": "$proj4",
+    "@fontsource/nunito": "$@fontsource/nunito",
+    "line-awesome": "$line-awesome"
   }
 }
