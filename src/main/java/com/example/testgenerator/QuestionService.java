@@ -1,19 +1,58 @@
 package com.example.testgenerator;
 
-import com.example.testgenerator.questions.CheckSum;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
 
     private static HashMap<String, Question> allQuestions = new HashMap<String, Question>();;
 
-    public QuestionService() {}
+    private static List<Q> QUESTION_LIST;
+
+    public void update() {
+        QUESTION_LIST = createQuestionList();
+    }
+
+    private static List<Q> createQuestionList() {
+        List<Q> questionList = new ArrayList<>();
+
+        int qID = 1;
+        int count = 0;
+        for (Question question : allQuestions.values()) {
+            questionList.add(new Q(qID, question.getName(), null));
+            count = questionList.size()-1;
+            int subqID = 1;
+            for (String subquestion : question.getAllSubquestionTypes()) {
+                questionList.add(new Q((qID*10)+subqID, question.getName()+" - "+subquestion, questionList.get(count)));
+                subqID++;
+            }
+            qID++;
+        }
+
+        return questionList;
+    }
+
+    public List<Q> getQuestions() {
+        return QUESTION_LIST;
+    }
+
+    public List<Q> getRootQuestions() {
+        return QUESTION_LIST
+                .stream()
+                .filter(department -> department.getParent() == null)
+                .collect(Collectors.toList());
+    }
+
+    public List<Q> getChildQuestions(Q parent) {
+        return QUESTION_LIST
+                .stream()
+                .filter(department -> Objects.equals(department.getParent(), parent))
+                .collect(Collectors.toList());
+    }
+
 
     public void addQuestion(String name, Question newQuestion) {
         // If there are no questions or question exists under a different name remove it and replace with new name
@@ -43,12 +82,8 @@ public class QuestionService {
         return allQuestions.values();
     }
 
-    public Collection<Question> getDummyQuestions() {
+    public Collection<Question> getEmpty() {
         HashMap<String, Question> q = new HashMap<String, Question>();
-        Question qq = new CheckSum();
-        q.put("hello", qq);
-        q.put("hgjjjyj", qq);
-        q.put("tssesre", qq);
         return q.values();
     }
 }
