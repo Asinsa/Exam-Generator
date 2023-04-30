@@ -70,6 +70,7 @@ public class QuizGenerationView extends HorizontalLayout {
             questionsGrid.addDragStartListener(this::handleDragStart);
             questionsGrid.addDropListener(e -> {
                 chosenQData.removeItem(draggedItem);
+                chosenQGrid.getDataProvider().refreshAll();
             });
             questionsGrid.addDragEndListener(this::handleDragEnd);
 
@@ -78,6 +79,11 @@ public class QuizGenerationView extends HorizontalLayout {
             chosenQGrid.addDragStartListener(this::handleDragStart);
             chosenQGrid.addDropListener(e -> {
                 //dataView2.addItem(draggedItem.makeClone());
+                if (draggedItem.getParent() != null) {
+                    if (!chosenQData.contains(draggedItem.getParent())){
+                        chosenQData.addItem(null, draggedItem.getParent());
+                    }
+                }
                 chosenQData.addItem(draggedItem.getParent(), draggedItem);
                 chosenQGrid.getDataProvider().refreshAll();
             });
@@ -96,7 +102,6 @@ public class QuizGenerationView extends HorizontalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().navigate(MainView.class);
         }
-
     }
 
     private static TreeGrid<Q> setupGrid(String name, TreeData<Q> data) {
