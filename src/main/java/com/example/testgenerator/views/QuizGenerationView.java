@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
@@ -53,28 +54,34 @@ public class QuizGenerationView extends HorizontalLayout {
         try {
             this.questionManager = questionManager;
 
-            TreeGrid<Q> questionsGrid = setupGrid("Questions");
-
-            questionsGrid.setItems(questionManager.getRootQuestions(), questionManager::getChildQuestions);
+            // Make grids
+            TreeData<Q> questionData = new TreeData<>();
+            TreeGrid<Q> questionsGrid = setupGrid("Questions", questionData);
+            questionData.addItems(questionManager.getRootQuestions(), questionManager::getChildQuestions);
             questionsGrid.setMaxWidth("25%");
             questionsGrid.setHeightFull();
 
-            TreeGrid<Q> chosenQGrid = setupGrid("Chosen Test Questions");
             TreeData<Q> chosenQData = new TreeData<>();
-            chosenQData.addItems(questionManager.getRootQuestions(), questionManager::getChildQuestions);
+            TreeGrid<Q> chosenQGrid = setupGrid("Chosen Test Questions", chosenQData);
             chosenQGrid.setHeightFull();
 
+            questionsGrid.setDropMode(GridDropMode.ON_GRID);
             questionsGrid.setRowsDraggable(true);
             questionsGrid.addDragStartListener(this::handleDragStart);
+            questionsGrid.addDropListener(e -> {
+                chosenQData.removeItem(draggedItem);
+            });
+            questionsGrid.addDragEndListener(this::handleDragEnd);
 
             chosenQGrid.setDropMode(GridDropMode.ON_GRID);
             chosenQGrid.setRowsDraggable(true);
             chosenQGrid.addDragStartListener(this::handleDragStart);
             chosenQGrid.addDropListener(e -> {
-                chosenQData.addItems(null, draggedItem);
+                //dataView2.addItem(draggedItem.makeClone());
+                chosenQData.addItem(draggedItem.getParent(), draggedItem);
+                chosenQGrid.getDataProvider().refreshAll();
             });
             chosenQGrid.addDragEndListener(this::handleDragEnd);
-
 
             layout.add(questionsGrid, chosenQGrid);
             layout.setHeightFull();
@@ -89,10 +96,11 @@ public class QuizGenerationView extends HorizontalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().navigate(MainView.class);
         }
+
     }
 
-    private static TreeGrid<Q> setupGrid(String name) {
-        TreeGrid<Q> grid = new TreeGrid<>();
+    private static TreeGrid<Q> setupGrid(String name, TreeData<Q> data) {
+        TreeGrid<Q> grid = new TreeGrid<>(new TreeDataProvider<>(data));
         grid.addHierarchyColumn(Q::getName).setHeader(name);
 
         setGridStyles(grid);
