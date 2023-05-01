@@ -4,8 +4,7 @@ public class Q {
     private int id;
     private String name;
     private Q parent;
-    private Q cloneOf = null;
-    private static int cloneNum = 1;
+    private int numQ = 0;
 
     public Q(int id, String name, Q parent) {
         this.id = id;
@@ -37,27 +36,16 @@ public class Q {
         this.parent = parent;
     }
 
-    public Q getOrigin() {
-        return cloneOf;
+    public void addQ() {
+        numQ++;
     }
 
-    public void setCloneOf(Q origin) {
-        this.cloneOf = origin;
+    public void removeQ() {
+        numQ--;
     }
 
-    public boolean isClone(Q question) {
-        if (question == cloneOf) {
-            return true;
-        }
-        return false;
-    }
-
-    public Q makeClone() {
-        int newID = this.id + cloneNum;
-        cloneNum++;
-        Q newClone = new Q(newID, this.name, this.parent);
-        newClone.setCloneOf(this);
-        return newClone;
+    public int getNumQ() {
+        return numQ;
     }
 
     @Override

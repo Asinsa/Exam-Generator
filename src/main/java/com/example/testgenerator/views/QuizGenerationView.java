@@ -64,27 +64,32 @@ public class QuizGenerationView extends HorizontalLayout {
             TreeData<Q> chosenQData = new TreeData<>();
             TreeGrid<Q> chosenQGrid = setupGrid("Chosen Test Questions", chosenQData);
             chosenQGrid.setHeightFull();
+            chosenQGrid.addColumn(Q::getNumQ).setHeader("Number Of Questions");
 
             questionsGrid.setDropMode(GridDropMode.ON_GRID);
             questionsGrid.setRowsDraggable(true);
             questionsGrid.addDragStartListener(this::handleDragStart);
             questionsGrid.addDropListener(e -> {
                 chosenQData.removeItem(draggedItem);
+                draggedItem.removeQ();
                 chosenQGrid.getDataProvider().refreshAll();
             });
             questionsGrid.addDragEndListener(this::handleDragEnd);
 
             chosenQGrid.setDropMode(GridDropMode.ON_GRID);
+            chosenQGrid.setDropMode(GridDropMode.BETWEEN);
             chosenQGrid.setRowsDraggable(true);
             chosenQGrid.addDragStartListener(this::handleDragStart);
             chosenQGrid.addDropListener(e -> {
-                //dataView2.addItem(draggedItem.makeClone());
-                if (draggedItem.getParent() != null) {
-                    if (!chosenQData.contains(draggedItem.getParent())){
-                        chosenQData.addItem(null, draggedItem.getParent());
+                if (draggedItem.getNumQ() < 1) {
+                    if (draggedItem.getParent() != null) {
+                        if (!chosenQData.contains(draggedItem.getParent())) {
+                            chosenQData.addItem(null, draggedItem.getParent());
+                        }
                     }
+                    chosenQData.addItem(draggedItem.getParent(), draggedItem);
                 }
-                chosenQData.addItem(draggedItem.getParent(), draggedItem);
+                draggedItem.addQ();
                 chosenQGrid.getDataProvider().refreshAll();
             });
             chosenQGrid.addDragEndListener(this::handleDragEnd);

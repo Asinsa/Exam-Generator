@@ -12,39 +12,23 @@ public class QuestionService {
 
     private static List<Q> QUESTION_LIST;
 
-    private static final int qID_START = 1000;
-    private static final int subqID_START = 100;
-
     public void update() {
         QUESTION_LIST = createQuestionList();
     }
 
-    /*
-     * ____ID____|____ID____
-     * Q1        |  #1000
-     *      Q1a  |     #1100
-     *      Q1b  |     #1200
-     * Q2        |  #2000
-     *      Q2a  |     #2100
-     * Q3        |  #3000
-     * Q4        |  #4000
-     *
-     * Clones are the ten's and unit's
-     */
     private static List<Q> createQuestionList() {
         List<Q> questionList = new ArrayList<>();
 
-        int qID = qID_START;
+        int id = 0;
         int count = 0;
         for (Question question : allQuestions.values()) {
-            questionList.add(new Q(qID, question.getName(), null));
+            questionList.add(new Q(id, question.getName(), null));
             count = questionList.size()-1;
-            int subqID = subqID_START;
+            id++;
             for (String subquestion : question.getAllSubquestionTypes()) {
-                questionList.add(new Q(qID+subqID, question.getName()+" - "+subquestion, questionList.get(count)));
-                subqID += subqID_START;
+                questionList.add(new Q(id, question.getName()+" - "+subquestion, questionList.get(count)));
+                id++;
             }
-            qID += qID_START;
         }
 
         return questionList;

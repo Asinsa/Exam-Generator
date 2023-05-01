@@ -10,6 +10,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -124,6 +125,7 @@ public class MainView extends HorizontalLayout {
         grid.addColumn(Question::getName).setHeader("Question Name").setSortable(true);
         grid.addColumn(Question::getDate).setHeader("Upload Date").setSortable(true);
         grid.setItems(questions);
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         return grid;
     }
 }
