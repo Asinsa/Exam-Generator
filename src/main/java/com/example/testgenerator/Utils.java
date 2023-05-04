@@ -32,7 +32,7 @@ public class Utils {
 
     public void generateHeader(FileWriter outFile, String filename) throws IOException {
         outFile.write("Quiz Title: CS-110 Programming 1: " + filename + "\n");
-        outFile.write("Quiz Description: <ul>"
+        outFile.write("Quiz description: <ul>"
                 + "<li>You MUST use your own copy of this assessment from Canvas. If you obtained this assessment document from a friend or elsewhere "
                 + "then delete this copy and use your own version from Canvas. If you experience difficulties downloading the assessment, get "
                 + "in contact via the emails below.</li>"
@@ -58,6 +58,9 @@ public class Utils {
                 + "<p>in case of queries email ALL of <a href=\"mailto:n.a.harman@swansea.ac.uk\">n.a.harman@swansea.ac.uk</a>, "
                 + "<a href= \"mailto:samuel.smith@swansea.ac.uk\">samuel.smith@swansea.ac.uk</a> AND "
                 + "<a href= \"mailto:assessment-scienceengineering@swansea.ac.uk\">assessment-scienceengineering@swansea.ac.uk</a>.</p>"
+                + "<p>&nbsp;</p>"
+                + "<hr/>"
+                + "<p>&nbsp;</p>"
                 + "<h2>Problem Solving Questions</h2>"
                 + "<p>Below are descriptions of the two Problem Solving question groups on this paper - you should refer to the background material on Canvas "
                 + "in the January Assessment Information module where you can find information on each of the six possible Problem Solving question types.</p>"

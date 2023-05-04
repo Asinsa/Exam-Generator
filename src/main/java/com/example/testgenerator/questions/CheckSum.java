@@ -121,7 +121,7 @@ public class CheckSum extends Question {
     public String generateBitwiseSubquestion(String answer, int qNum) {
         byte question = getBitwise(answer);
 
-        String questionWording = qNum + ". Checksum: Which of the following strings generates the bitwise checksum " + question + "?";
+        String questionWording = qNum + ". Checksum: Which of the following strings generates the bitwise checksum " + question + "?<font style=\"display:none\">" + utils.genRandomRange(1000000, 9999999) + "</font>";
 
         int ansLoc = utils.genRandomRange(0, 4);
         String[] qSet = generateMultipleChoices(String.valueOf(question), answer, ansLoc, "REVERSE");

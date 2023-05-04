@@ -2,6 +2,7 @@ package com.example.testgenerator;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public abstract class Question {
@@ -23,10 +24,20 @@ public abstract class Question {
      */
     public abstract String getName();
 
+    /**
+     * When question is added to the application this is used to document the date.
+     *
+     * @param date  The data the question was added to the application
+     */
     public void setDate(String date) {
         this.date = date;
     }
 
+    /**
+     * Date the question was added to the application
+     *
+     * @return  Date question was added
+     */
     public String getDate() {
         return date;
     }
@@ -98,6 +109,9 @@ public abstract class Question {
 
     /**
      * Generates specific subquestions
+     * Remember to add
+     *          <font style=\"display:none\">" + utils.genRandomRange(1000000, 9999999) + "</font>
+     * after the question mark of each question in any subquestions created manually.
      *
      * @param type      The type of subquestion
      * @param num       The number of questions of that type to generate
@@ -132,7 +146,7 @@ public abstract class Question {
         if (type != "PAIRS") {
             questionWording += question;
         }
-        questionWording += "?";
+        questionWording += "?<font style=\"display:none\">" + utils.genRandomRange(1000000, 9999999) + "</font>";
 
         if (utils.testNotUnique(qSet)) {
             System.out.println("***ERROR Qset Checksum simple numbers Not Unique");
@@ -212,13 +226,28 @@ public abstract class Question {
         return qSet;
     }
 
-    // Generates the header in the file
-    public void genHeader(FileWriter outFile) throws IOException {
-        outFile.write(getHeader());
+    /**
+     * Generates the question header into the quiz file.
+     *
+     * @param outFile   The output file
+     */
+    public void generateHeader(FileWriter outFile) throws IOException {
+        outFile.write("<p>&nbsp;</p>" + getHeader());
     }
 
-    // Generates the subquestions in the file
-    public void genSubQuestions(FileWriter outFile, int num) throws IOException {
-        outFile.write(getSubQuestions(num));
+    /**
+     * Generates the subquestions for the specified subquestions into the quiz file.
+     *
+     * @param outFile               The output file
+     * @param startCount            The question number to start counting from
+     * @param specificSubquestions  A list of all the subqestions to go in the quiz including repeats if necessary
+     */
+    public void generateSubquestionBlock(FileWriter outFile, int startCount, ArrayList<String> specificSubquestions) throws IOException  {
+        String output = "";
+        for (String subquestion : specificSubquestions) {
+            output += "\n" + getSpecificSubQuestion(subquestion, startCount);
+            startCount++;
+        }
+        outFile.write("\n" + output);
     }
 }

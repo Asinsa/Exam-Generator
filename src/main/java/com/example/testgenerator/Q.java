@@ -41,7 +41,7 @@ public class Q {
     }
 
     public void removeQ() {
-        numQ--;
+        numQ = 0;
     }
 
     public int getNumQ() {
