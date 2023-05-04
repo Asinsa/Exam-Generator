@@ -40,6 +40,8 @@ public class GenerateView extends HorizontalLayout {
 
     /**
      * Creates a new GenerateView.
+     *
+     * @param questionManager   The question service that contains all information about the questions.
      */
     public GenerateView(QuestionService questionManager) {
         questionManager.update();
@@ -102,6 +104,12 @@ public class GenerateView extends HorizontalLayout {
 
     }
 
+    /**
+     * Method to check if a file by the file name specified by user exists already.
+     *
+     * @param filename  Filename entered by user.
+     * @return true if filename already present, false if not.
+     */
     private boolean fileExists(String filename) {
         File[] files = new File("src/papers").listFiles();
 
@@ -120,6 +128,9 @@ public class GenerateView extends HorizontalLayout {
         return true;
     }
 
+    /**
+     * Method to add the chosen questions to the question service and the chosen subquestions to the questions.
+     */
     private void addChosen() {
         Question newQuestion = null;
         ArrayList<String> subquestions = new ArrayList<>();
@@ -141,6 +152,11 @@ public class GenerateView extends HorizontalLayout {
         }
     }
 
+    /**
+     * Method to generate the quiz files.
+     *
+     * @param filename  Name of the quiz and the filename of the quiz.
+     */
     private void generateQuiz(String filename) {
         if (!filename.isEmpty()) {
             FileWriter outFile;
@@ -170,5 +186,4 @@ public class GenerateView extends HorizontalLayout {
             }
         }
     }
-
 }

@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/**
+ * Abstract class to define a Question.
+ */
 public abstract class Question {
 
     protected HashSet<String> SubquestionTypes = new HashSet<String>();
@@ -13,6 +16,9 @@ public abstract class Question {
     private ArrayList<String> chosenSubquestions = new ArrayList<>();
     private int numRand;
 
+    /**
+     * Default constructor method that initialises the default 3 subquestion types BASE, REVERSE and PAIRS.
+     */
     public Question() {
         SubquestionTypes.add("BASE");
         SubquestionTypes.add("REVERSE");

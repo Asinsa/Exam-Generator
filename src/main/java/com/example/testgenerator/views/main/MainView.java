@@ -28,6 +28,10 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 
+/**
+ * Main View Class is the first view users will see and contains a question upload section and a list of
+ * all previously uploaded questions.
+ */
 @PageTitle("Main")
 @RouteAlias("home")
 @Route(value = "main", layout = MainLayout.class)
@@ -38,6 +42,11 @@ public class MainView extends HorizontalLayout {
     private Button makeQuiz;
     private QuestionService questionManager;
 
+    /**
+     * Creates a new MainView.
+     *
+     * @param questionManager   The question service that contains all information about the questions.
+     */
     public MainView(QuestionService questionManager) {
         this.questionManager = questionManager;
 
@@ -61,6 +70,11 @@ public class MainView extends HorizontalLayout {
         mainLayout.add(layout, makeQuiz);
     }
 
+    /**
+     * Method to create the upload section consisting of an upload button and a file uploader.
+     *
+     * @return the component containg the upload section.
+     */
     private Component getUploadSection() {
         // Upload questions
         File uploadFolder = new File("src/main/java/com/example/testgenerator/questions");
@@ -93,6 +107,11 @@ public class MainView extends HorizontalLayout {
         return upload;
     }
 
+    /**
+     * Method to create the list of questions and their upload date.
+     *
+     * @return the Grid component containg the question file list.
+     */
     private Component getFileList() {
         // View All Question Names
         HashSet<Question> questions = new HashSet<>();

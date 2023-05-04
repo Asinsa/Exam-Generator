@@ -22,6 +22,13 @@ public class MainLayout extends AppLayout {
 
         private final Class<? extends Component> view;
 
+        /**
+         * Method to create the menu.
+         *
+         * @param menuTitle     The title of the menu.
+         * @param iconClass     The icon class.
+         * @param view          The view to load the menu in.
+         */
         public MenuItemInfo(String menuTitle, String iconClass, Class<? extends Component> view) {
             this.view = view;
             RouterLink link = new RouterLink();
@@ -59,10 +66,18 @@ public class MainLayout extends AppLayout {
 
     }
 
+    /**
+     * Method to add the navbar header to the layout.
+     */
     public MainLayout() {
         addToNavbar(createHeaderContent());
     }
 
+    /**
+     * Method to create the header contents.
+     *
+     * @return the componet containing the header content.
+     */
     private Component createHeaderContent() {
         Header header = new Header();
         header.addClassNames(BoxSizing.BORDER, Display.FLEX, FlexDirection.COLUMN, Width.FULL);
@@ -91,6 +106,11 @@ public class MainLayout extends AppLayout {
         return header;
     }
 
+    /**
+     * Method to create the menu items for the header.
+     *
+     * @return the list of menu items.
+     */
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
                 new MenuItemInfo("Main", "la la-check-circle", MainView.class), //

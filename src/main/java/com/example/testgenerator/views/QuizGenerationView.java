@@ -49,6 +49,8 @@ public class QuizGenerationView extends HorizontalLayout {
 
     /**
      * Creates a new QuizGenerationView.
+     *
+     * @param questionManager   The question service that contains all information about the questions.
      */
     public QuizGenerationView(QuestionService questionManager) {
         questionManager.update();
@@ -63,7 +65,6 @@ public class QuizGenerationView extends HorizontalLayout {
         layout.setHeightFull();
 
         setMargin(true);
-
 
         try {
             this.questionManager = questionManager;
@@ -127,6 +128,11 @@ public class QuizGenerationView extends HorizontalLayout {
         }
     }
 
+    /**
+     * Method to return an error notification.
+     *
+     * @param errorDescription  The error message that will be displayed to the user.
+     */
     public static void returnError(String errorDescription) {
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -146,6 +152,11 @@ public class QuizGenerationView extends HorizontalLayout {
         notification.open();
     }
 
+    /**
+     * Method to remove questions and subquestions from the TreeGrid.
+     * If a question is removed all it's chosen subquestions are removed aswell.
+     * If a subquestion is removed, and it's question has no chosen subquestions, the question is removed aswell.
+     */
     private void removeQuestion() {
         if (draggedItem.getParent() == null) { // if question then remove all corresponding subquestions first
             for (Q subquestion : chosenQData.getChildren(draggedItem)) {
@@ -171,6 +182,11 @@ public class QuizGenerationView extends HorizontalLayout {
         chosenQGrid.getDataProvider().refreshAll();
     }
 
+    /**
+     * Method to add questions and subquestions to the TreeGrid.
+     * If a question is added by itsef, it's count goes up to signfy 1 random subquestion type to be made.
+     * If a subquestion is added, and it's question has not been chosen, the question is automatically added.
+     */
     private void addQuestion() {
         if (draggedItem.getParent() != null) { // if it is a subquestion
             if (!chosenQData.contains(draggedItem.getParent())) { // if it's question isn't in list add it
@@ -195,10 +211,18 @@ public class QuizGenerationView extends HorizontalLayout {
         chosenQGrid.getDataProvider().refreshAll();
     }
 
+    /**
+     * Method to update the footer which displays the total number of questions currently chosen.
+     */
     private void updateFooter() {
         total.setText("Total Questions = " + getCount());
     }
 
+    /**
+     * Method to get the number of chosen subquestions.
+     *
+     * @return the number of chosen subquestions.
+     */
     private int getCount() {
         int count = 0;
         for (Q question : chosenQData.getRootItems()) {
@@ -210,6 +234,13 @@ public class QuizGenerationView extends HorizontalLayout {
         return count;
     }
 
+    /**
+     * Method to setup a TreeGrid with the appropriate names and styles.
+     *
+     * @param name  Name of the grid.
+     * @param data  The data provider for the grid.
+     * @return the TreeGrid.
+     */
     private static TreeGrid<Q> setupGrid(String name, TreeData<Q> data) {
         TreeGrid<Q> grid = new TreeGrid<>(new TreeDataProvider<>(data));
         grid.addHierarchyColumn(Q::getName).setHeader(name);
@@ -219,23 +250,32 @@ public class QuizGenerationView extends HorizontalLayout {
         return grid;
     }
 
+    /**
+     * Method to handle where an item is dragged from.
+     *
+     * @param e the starting point of the dragging.
+     */
     private void handleDragStart(GridDragStartEvent<Q> e) {
         draggedItem = e.getDraggedItems().get(0);
     }
 
+    /**
+     * Method to handle where an item is dragged to.
+     *
+     * @param e the ending point of the dragging.
+     */
     private void handleDragEnd(GridDragEndEvent<Q> e) {
         draggedItem = null;
     }
 
+    /**
+     * Method to set the grid style.
+     *
+     * @param grid  The grid to set the style of.
+     */
     private static void setGridStyles(Grid<Q> grid) {
         grid.getStyle().set("width", "300px").set("height", "300px")
                 .set("margin-left", "0.5rem").set("margin-top", "0.5rem")
                 .set("align-self", "unset");
     }
-
-    private static void setContainerStyles(Div container) {
-        container.getStyle().set("display", "flex").set("flex-direction", "row")
-                .set("flex-wrap", "wrap");
-    }
-
 }
