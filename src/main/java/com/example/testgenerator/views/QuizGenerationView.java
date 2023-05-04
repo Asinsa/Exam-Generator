@@ -33,6 +33,11 @@ public class QuizGenerationView extends HorizontalLayout {
 
     private QuestionService questionManager;
     private Q draggedItem;
+    private TreeGrid<Q> questionsGrid;
+    private TreeData<Q> questionData = new TreeData<>();;
+    private TreeGrid<Q> chosenQGrid;
+    private TreeData<Q> chosenQData = new TreeData<>();
+    private FooterRow.FooterCell total;
 
     /**
      * Creates a new QuizGenerationView.
@@ -56,47 +61,23 @@ public class QuizGenerationView extends HorizontalLayout {
             this.questionManager = questionManager;
 
             // Make grids
-            TreeData<Q> questionData = new TreeData<>();
-            TreeGrid<Q> questionsGrid = setupGrid("Questions", questionData);
+            questionsGrid = setupGrid("Questions", questionData);
             questionData.addItems(questionManager.getRootQuestions(), questionManager::getChildQuestions);
             questionsGrid.setMaxWidth("25%");
             questionsGrid.setHeightFull();
 
-            TreeData<Q> chosenQData = new TreeData<>();
-            TreeGrid<Q> chosenQGrid = setupGrid("Chosen Test Questions", chosenQData);
+            chosenQGrid = setupGrid("Chosen Test Questions", chosenQData);
             chosenQGrid.setHeightFull();
-            chosenQGrid.addColumn(Q::getNumQ).setHeader("Number Of Questions");//.setFooter("Total Questions = ");
+            chosenQGrid.addColumn(Q::getNumQ).setHeader("Number Of Questions");
             FooterRow footer = chosenQGrid.prependFooterRow();
-            footer.getCell(chosenQGrid.getColumns().get(1)).setText("Total Questions = 0");
+            total = footer.getCell(chosenQGrid.getColumns().get(1));
+            total.setText("Total Questions = 0");
 
             questionsGrid.setDropMode(GridDropMode.ON_GRID);
             questionsGrid.setRowsDraggable(true);
             questionsGrid.addDragStartListener(this::handleDragStart);
             questionsGrid.addDropListener(e -> {
-                System.out.println(draggedItem.getName());
-                if (draggedItem.getParent() == null) { // if question then remove all corresponding subquestions first
-                    for (Q subquestion : chosenQData.getChildren(draggedItem)) {
-                        subquestion.removeQ();
-                    }
-
-                    if (chosenQData.getChildren(draggedItem.getParent()).stream().count() == 0) {
-                        chosenQData.removeItem(draggedItem.getParent());
-                    }
-                }
-                // just remove the dragged one
-                draggedItem.removeQ();
-                chosenQData.removeItem(draggedItem);
-
-                int count = 0;
-                for (Q question : chosenQData.getRootItems()) {
-                    for (Q subquestion : chosenQData.getChildren(question)) {
-                        count += subquestion.getNumQ();
-                    }
-                    count += question.getNumQ();
-                }
-                footer.getCell(chosenQGrid.getColumns().get(1)).setText("Total Questions = " + count);
-
-                chosenQGrid.getDataProvider().refreshAll();
+                removeQuestion();
             });
             questionsGrid.addDragEndListener(this::handleDragEnd);
 
@@ -105,35 +86,7 @@ public class QuizGenerationView extends HorizontalLayout {
             chosenQGrid.setRowsDraggable(true);
             chosenQGrid.addDragStartListener(this::handleDragStart);
             chosenQGrid.addDropListener(e -> {
-                if (draggedItem.getParent() != null) { // if it is a subquestion
-                    if (!chosenQData.contains(draggedItem.getParent())) { // if it's question isn't in list add it
-                        chosenQData.addItem(null, draggedItem.getParent());
-                    }
-                } else {
-                    draggedItem.addQ();
-                }
-
-                if (!chosenQData.contains(draggedItem)) {
-                    chosenQData.addItem(draggedItem.getParent(), draggedItem);
-                    if (draggedItem.getParent() != null) {
-                        draggedItem.addQ();
-                    }
-                } else {
-                    if (draggedItem.getParent() != null) {
-                        draggedItem.addQ();
-                    }
-                }
-
-                int count = 0;
-                for (Q question : chosenQData.getRootItems()) {
-                    for (Q subquestion : chosenQData.getChildren(question)) {
-                        count += subquestion.getNumQ();
-                    }
-                    count += question.getNumQ();
-                }
-                footer.getCell(chosenQGrid.getColumns().get(1)).setText("Total Questions = " + count);
-
-                chosenQGrid.getDataProvider().refreshAll();
+                addQuestion();
             });
             chosenQGrid.addDragEndListener(this::handleDragEnd);
 
@@ -150,6 +103,66 @@ public class QuizGenerationView extends HorizontalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().navigate(MainView.class);
         }
+    }
+
+    private void removeQuestion() {
+        if (draggedItem.getParent() == null) { // if question then remove all corresponding subquestions first
+            for (Q subquestion : chosenQData.getChildren(draggedItem)) {
+                subquestion.removeQ();
+            }
+
+            if (chosenQData.getChildren(draggedItem.getParent()).stream().count() == 0) {
+                chosenQData.removeItem(draggedItem.getParent());
+            }
+        }
+
+        // just remove the dragged one
+        draggedItem.removeQ();
+        chosenQData.removeItem(draggedItem);
+
+        if (draggedItem.getParent() != null) {
+            if ((draggedItem.getParent().getNumQ() == 0) && (chosenQData.getChildren(draggedItem.getParent()).stream().count() == 0)) {
+                chosenQData.removeItem(draggedItem.getParent());
+            }
+        }
+
+        updateFooter();
+        chosenQGrid.getDataProvider().refreshAll();
+    }
+
+    private void addQuestion() {
+        if (draggedItem.getParent() != null) { // if it is a subquestion
+            if (!chosenQData.contains(draggedItem.getParent())) { // if it's question isn't in list add it
+                chosenQData.addItem(null, draggedItem.getParent());
+            }
+        } else {
+            draggedItem.addQ();
+        }
+
+        if (!chosenQData.contains(draggedItem)) {
+            chosenQData.addItem(draggedItem.getParent(), draggedItem);
+            if (draggedItem.getParent() != null) {
+                draggedItem.addQ();
+            }
+        } else {
+            if (draggedItem.getParent() != null) {
+                draggedItem.addQ();
+            }
+        }
+
+        updateFooter();
+        chosenQGrid.getDataProvider().refreshAll();
+    }
+
+    private void updateFooter() {
+        int count = 0;
+        for (Q question : chosenQData.getRootItems()) {
+            for (Q subquestion : chosenQData.getChildren(question)) {
+                count += subquestion.getNumQ();
+            }
+            count += question.getNumQ();
+        }
+        total.setText("Total Questions = " + count);
     }
 
     private static TreeGrid<Q> setupGrid(String name, TreeData<Q> data) {
