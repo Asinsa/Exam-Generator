@@ -48,11 +48,6 @@ public class CheckSum extends Question {
     }
 
     @Override
-    public String getSubQuestions(int num) {
-        return null;
-    }
-
-    @Override
     public String getQuestionVariable() {
         return utils.genRandomString(MIN_LEN, SIZE_RNG, LOW_RNG, HIGH_RNG, false);
     }

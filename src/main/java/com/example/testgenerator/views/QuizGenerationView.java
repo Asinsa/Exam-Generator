@@ -4,14 +4,19 @@ import com.example.testgenerator.Q;
 import com.example.testgenerator.QuestionService;
 import com.example.testgenerator.views.main.MainView;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -19,6 +24,9 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Designer generated component for the quiz-generation-view template.
@@ -95,7 +103,21 @@ public class QuizGenerationView extends HorizontalLayout {
 
             // Make Quiz Button
             Button makeQuiz = new Button("Next");
-            makeQuiz.addClickListener( e -> UI.getCurrent().navigate(QuizGenerationView.class));
+            makeQuiz.addClickListener( e -> {
+                if (getCount() > 0) {
+                    List<Q> chosenList = new ArrayList<Q>();
+                    for (Q question : chosenQData.getRootItems()) {
+                        chosenList.add(question);
+                        for (Q subquestion : chosenQData.getChildren(question)) {
+                            chosenList.add(subquestion);
+                        }
+                    }
+                    questionManager.setChosenQuestions(chosenList);
+                    UI.getCurrent().navigate(GenerateView.class);
+                } else {
+                    returnError("Please Select Some Questions!");
+                }
+            });
 
             add(mainLayout);
             mainLayout.add(layout, makeQuiz);
@@ -103,6 +125,25 @@ public class QuizGenerationView extends HorizontalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().navigate(MainView.class);
         }
+    }
+
+    public static void returnError(String errorDescription) {
+        Notification notification = new Notification();
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+        Div text = new Div(new Text(errorDescription));
+
+        Button closeButton = new Button(new Icon("lumo", "cross"));
+        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        closeButton.getElement().setAttribute("aria-label", "Close");
+        closeButton.addClickListener(event -> {
+            notification.close();
+        });
+
+        HorizontalLayout layout = new HorizontalLayout(text, closeButton);
+
+        notification.add(layout);
+        notification.open();
     }
 
     private void removeQuestion() {
@@ -155,6 +196,10 @@ public class QuizGenerationView extends HorizontalLayout {
     }
 
     private void updateFooter() {
+        total.setText("Total Questions = " + getCount());
+    }
+
+    private int getCount() {
         int count = 0;
         for (Q question : chosenQData.getRootItems()) {
             for (Q subquestion : chosenQData.getChildren(question)) {
@@ -162,7 +207,7 @@ public class QuizGenerationView extends HorizontalLayout {
             }
             count += question.getNumQ();
         }
-        total.setText("Total Questions = " + count);
+        return count;
     }
 
     private static TreeGrid<Q> setupGrid(String name, TreeData<Q> data) {

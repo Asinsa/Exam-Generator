@@ -10,6 +10,8 @@ public abstract class Question {
     protected HashSet<String> SubquestionTypes = new HashSet<String>();
     protected Utils utils = new Utils();
     protected String date;
+    private ArrayList<String> chosenSubquestions = new ArrayList<>();
+    private int numRand;
 
     public Question() {
         SubquestionTypes.add("BASE");
@@ -59,12 +61,24 @@ public abstract class Question {
     }
 
     /**
-     * Returns a block of multiple subquestions (by the amount specified)
+     * Returns a block of multiple random subquestions (by the amount specified)
      *
-     * @param num   The number of subquestions to generate
-     * @return      A block of subquestions
+     * @param num           The number of subquestions to generate
+     * @param startCount    The question number to start counting from
+     * @return              A block of subquestions
      */
-    public abstract String getSubQuestions(int num);
+    public String getSubQuestions(int num, int startCount) {
+        int size = getAllSubquestionTypes().size();
+        String questions = "";
+
+        String[] possibleSubquestions = getAllSubquestionTypes().toArray(new String[size]);
+
+        for (int i = 0; i < num; i++) {
+            questions += "\n" + getSpecificSubQuestion(possibleSubquestions[utils.genRandomRange(0, size)], startCount);
+            startCount++;
+        }
+        return questions;
+    }
 
     /**
      * Returns the question variable (the thing that makes the questions unique)
@@ -240,14 +254,43 @@ public abstract class Question {
      *
      * @param outFile               The output file
      * @param startCount            The question number to start counting from
-     * @param specificSubquestions  A list of all the subqestions to go in the quiz including repeats if necessary
      */
-    public void generateSubquestionBlock(FileWriter outFile, int startCount, ArrayList<String> specificSubquestions) throws IOException  {
+    public void generateSubquestionBlock(FileWriter outFile, int startCount) throws IOException  {
         String output = "";
-        for (String subquestion : specificSubquestions) {
+        for (String subquestion : chosenSubquestions) {
             output += "\n" + getSpecificSubQuestion(subquestion, startCount);
             startCount++;
         }
+
+        output += "\n" + getSubQuestions(numRand, startCount);
+
         outFile.write("\n" + output);
+    }
+
+    /**
+     * Adds the chosen subquestions to a list
+     *
+     * @param chosenSubquestions        The list of chosen subquestions to add
+     */
+    public void setChosenSubquestions(ArrayList<String> chosenSubquestions) {
+        this.chosenSubquestions = chosenSubquestions;
+    }
+
+    /**
+     * Sets the number of random questions to generate
+     *
+     * @param num        The number of random subquestions to generate
+     */
+    public void setNumRand(int num) {
+        this.numRand = num;
+    }
+
+    /**
+     * Gets the chosen subquestions
+     *
+     * @return chosenSubquestions        The list of chosen subquestions
+     */
+    public ArrayList<String> getChosenSubquestions() {
+        return chosenSubquestions;
     }
 }

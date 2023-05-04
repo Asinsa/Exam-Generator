@@ -21,11 +21,6 @@ public class TestFileA extends Question {
     }
 
     @Override
-    public String getSubQuestions(int num) {
-        return null;
-    }
-
-    @Override
     public String getQuestionVariable() {
         return null;
     }

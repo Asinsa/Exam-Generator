@@ -12,6 +12,8 @@ public class QuestionService {
 
     private static List<Q> QUESTION_LIST;
 
+    private static List<Q> CHOSEN_QUESTION_LIST = new ArrayList<>();;
+
     public void update() {
         QUESTION_LIST = createQuestionList();
     }
@@ -52,6 +54,13 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
+    public void setChosenQuestions(List<Q> allChosenQuestions) {
+        this.CHOSEN_QUESTION_LIST = allChosenQuestions;
+    }
+
+    public List<Q> getChosenQuestions() {
+        return CHOSEN_QUESTION_LIST;
+    }
 
     public void addQuestion(String name, Question newQuestion) {
         // If there are no questions or question exists under a different name remove it and replace with new name
