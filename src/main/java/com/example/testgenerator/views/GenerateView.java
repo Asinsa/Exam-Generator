@@ -4,10 +4,18 @@ import com.example.testgenerator.Q;
 import com.example.testgenerator.Question;
 import com.example.testgenerator.QuestionService;
 import com.example.testgenerator.Utils;
+import com.example.testgenerator.views.main.MainView;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -80,7 +88,7 @@ public class GenerateView extends HorizontalLayout {
         makeQuiz.addClickListener( e -> {
             String filename = title.getValue();
 
-            if (fileExists(filename)) {
+            if (!fileExists(filename)) {
                 if (numQuizzes.getValue() == 1) {
                     System.out.println(filename);
                     generateQuiz(filename);
@@ -116,7 +124,7 @@ public class GenerateView extends HorizontalLayout {
         int copies = 0;
         for (File file : files) {
             if (file.isFile()) {
-                if (filename.equals(file.getName())) {
+                if ((filename + ".txt").equals(file.getName())) {
                     copies++;
                 }
             }
@@ -133,23 +141,23 @@ public class GenerateView extends HorizontalLayout {
      */
     private void addChosen() {
         Question newQuestion = null;
-        ArrayList<String> subquestions = new ArrayList<>();
         for (Q question : chosenQuestions) {
-            if (question.getParent() == null) {
-                if (newQuestion != null && !subquestions.isEmpty()) {
-                    newQuestion.setChosenSubquestions(subquestions);
-                    subquestions.clear();
+            if (question.getParent() == null) { // is a question
+
+                if (newQuestion != null) {
+                    questionList.add(newQuestion);
                 }
                 newQuestion = questionManager.findQuestion(question.getName());
-                questionList.add(newQuestion);
+
                 if (question.getNumQ() > 0) {
                     newQuestion.setNumRand(question.getNumQ());
                 }
-            } else {
+            } else if (newQuestion != null) {
                 String[] parts = question.getName().split(" - ");
-                subquestions.add(parts[1]);
+                newQuestion.addChosenSubquestion(parts[1]);
             }
         }
+        questionList.add(newQuestion);
     }
 
     /**
@@ -170,20 +178,45 @@ public class GenerateView extends HorizontalLayout {
                     question.generateHeader(outFile);
                 }
 
-                int count = 1;
                 for (Question question : questionList) {
-                    ArrayList<String> subquestions = question.getChosenSubquestions();
-                    question.generateSubquestionBlock(outFile, count);
-                    count += subquestions.size();
+                    question.generateSubquestionBlock(outFile, 1);
                 }
 
                 System.out.println("Build done");
                 outFile.close();
+                returnSuccess("New quiz/quizzes " + filename + " created!");
+                UI.getCurrent().navigate(MainView.class);
 
             } catch (IOException ee) {
                 System.out.println("File error");
                 System.exit(-1);
+            } catch (Exception e) {
+                QuizGenerationView.returnError("Quiz unable to be created due to question/subquestion file error! Please check the contents of your file!");
             }
         }
+    }
+
+    /**
+     * Method to return an success notification.
+     *
+     * @param successDescription  The success message that will be displayed to the user.
+     */
+    public static void returnSuccess(String successDescription) {
+        Notification notification = new Notification();
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+        Div text = new Div(new Text(successDescription));
+
+        Button closeButton = new Button(new Icon("lumo", "cross"));
+        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        closeButton.getElement().setAttribute("aria-label", "Close");
+        closeButton.addClickListener(event -> {
+            notification.close();
+        });
+
+        HorizontalLayout layout = new HorizontalLayout(text, closeButton);
+
+        notification.add(layout);
+        notification.open();
     }
 }

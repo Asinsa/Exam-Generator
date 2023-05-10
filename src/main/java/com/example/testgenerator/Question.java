@@ -80,7 +80,7 @@ public abstract class Question {
         String[] possibleSubquestions = getAllSubquestionTypes().toArray(new String[size]);
 
         for (int i = 0; i < num; i++) {
-            questions += "\n" + getSpecificSubQuestion(possibleSubquestions[utils.genRandomRange(0, size)], startCount);
+            questions += "\n" + getSpecificSubQuestion(possibleSubquestions[utils.genRandomRange(0, size-1)], startCount);
             startCount++;
         }
         return questions;
@@ -263,12 +263,15 @@ public abstract class Question {
      */
     public void generateSubquestionBlock(FileWriter outFile, int startCount) throws IOException  {
         String output = "";
+
         for (String subquestion : chosenSubquestions) {
             output += "\n" + getSpecificSubQuestion(subquestion, startCount);
             startCount++;
         }
 
         output += "\n" + getSubQuestions(numRand, startCount);
+
+        System.out.println(output);
 
         outFile.write("\n" + output);
     }
@@ -280,6 +283,10 @@ public abstract class Question {
      */
     public void setChosenSubquestions(ArrayList<String> chosenSubquestions) {
         this.chosenSubquestions = chosenSubquestions;
+    }
+
+    public void addChosenSubquestion(String chosenSubquestion) {
+        chosenSubquestions.add(chosenSubquestion);
     }
 
     /**
